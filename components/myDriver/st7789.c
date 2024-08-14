@@ -69,7 +69,7 @@ void lcd_fill(uint32_t color)
 {
     lcd_set_window(0, 0, LCD_W - 1, LCD_H - 1);
 
-    uint8_t buf[LCD_W * 2]; // 非dma最大SOC_SPI_MAXIMUM_BUFFER_SIZE， dma最大4095
+    uint8_t buf[LCD_W * 2];
     for (int i = 0; i < sizeof(buf); i++)
     {
         if (i % 2 == 0)
@@ -83,10 +83,10 @@ void lcd_fill(uint32_t color)
     }
 }
 
-// 屏幕初始化
 void lcd_init(void)
 {
     // 初始化spi外设
+    // init bus
     ESP_LOGI("lcd_init", "Initializing bus SPI%d...", SPI2_HOST + 1);
     spi_bus_config_t buscfg = {
         .miso_io_num = -1,
@@ -99,6 +99,7 @@ void lcd_init(void)
     spi_bus_initialize(SPI2_HOST, &buscfg, SPI_DMA_CH_AUTO);
 
     // 初始化spi驱动
+    // init driver
     spi_device_interface_config_t devcfg = {
         .command_bits = 0,
         .address_bits = 0,
@@ -112,15 +113,15 @@ void lcd_init(void)
     spi_bus_add_device(SPI2_HOST, &devcfg, &spiHandle);
 
     // 重置lcd
+    // reset lcd
     gpio_set_level(PIN_TFT_RST, 0);
     vTaskDelay(20 / portTICK_PERIOD_MS);
     gpio_set_level(PIN_TFT_RST, 1);
     vTaskDelay(20 / portTICK_PERIOD_MS);
 
-    //************* Start Initial Sequence **********//
     lcd_write_cmd(0x11);                  // Sleep out
     vTaskDelay(120 / portTICK_PERIOD_MS); // Delay 120ms
-    //************* Start Initial Sequence **********//
+
     lcd_write_cmd(0x36);
     lcd_write_data(
         //  my        mx         mv         ml         rgb        mh

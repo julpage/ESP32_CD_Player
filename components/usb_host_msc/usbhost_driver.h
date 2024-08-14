@@ -11,9 +11,9 @@ typedef enum
 
 typedef struct
 {
-    uint8_t dev_addr;
     usb_host_client_handle_t handle_client;
     usb_device_handle_t handle_device;
+    uint8_t dev_addr;
     uint8_t deviceIsOpened;
 
     usb_intf_desc_t *desc_interface;

@@ -77,6 +77,7 @@ void i2s_transmitTask(void *args)
         buf = i2s_txBuf[i2s_buf_sendI];
 
         // 发给示波器
+        // sent to oscilloscope
         if (queue_oscilloscope != NULL)
         {
             ChannelValue_t oscilloscope;
@@ -89,17 +90,18 @@ void i2s_transmitTask(void *args)
 
                 if (downSampleCount == 20)
                 {
-                    downSampleCount = 0;
-                    oscilloscope.l = oL / 20;
-                    oscilloscope.r = oR / 20;
+                    oscilloscope.l = oL / downSampleCount;
+                    oscilloscope.r = oR / downSampleCount;
                     xQueueSend(queue_oscilloscope, &oscilloscope, 0);
                     oL = 0;
                     oR = 0;
+                    downSampleCount = 0;
                 }
             }
         }
 
         // 音量处理
+        // change volume
         float scale = volumeScale[cdplayer_playerInfo.volume];
         int16_t *sample = (int16_t *)(buf);
         for (int i = 0; i < (I2S_TX_BUFFER_LEN / 2); i++)

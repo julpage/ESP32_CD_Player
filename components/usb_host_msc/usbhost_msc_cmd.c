@@ -18,7 +18,7 @@
 
 #include "usbhost_msc_cmd.h"
 
-uint32_t dCBWTag = 0x01145140; // (首)
+uint32_t dCBWTag = 0x01145140; // 哼
 SemaphoreHandle_t scsiExeLock;
 
 esp_err_t usbhost_resetRecovery()

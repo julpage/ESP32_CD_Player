@@ -23,6 +23,7 @@ void OLED_Display_On(void)
     OLED_WR_Byte(0X14, OLED_CMD); // DCDC ON
     OLED_WR_Byte(0XAF, OLED_CMD); // DISPLAY ON
 }
+
 // 关闭OLED显示
 void OLED_Display_Off(void)
 {
@@ -30,6 +31,7 @@ void OLED_Display_Off(void)
     OLED_WR_Byte(0X10, OLED_CMD); // DCDC OFF
     OLED_WR_Byte(0XAE, OLED_CMD); // DISPLAY OFF
 }
+
 // 坐标设置
 void OLED_Set_Pos(uint8_t x, uint8_t y)
 {
@@ -42,22 +44,11 @@ void OLED_Set_Pos(uint8_t x, uint8_t y)
 void OLED_Clear(void)
 {
     uint8_t i, n;
-    for (i = 0; i < 9; i++)
+    for (i = 0; i < 8; i++)
     {
-        OLED_WR_Byte(0xb0 + i, OLED_CMD); // 设置页地址（0~7）
-        OLED_WR_Byte(0x00, OLED_CMD);     // 设置显示位置—列低地址
-        OLED_WR_Byte(0x10, OLED_CMD);     // 设置显示位置—列高地址
+        OLED_Set_Pos(0, i);
         for (n = 0; n < 128; n++)
             OLED_WR_Byte(0x00, OLED_DATA);
-    }
-}
-
-void OLED_clearPage(uint8_t y)
-{
-    OLED_Set_Pos(0, y);
-    for (int i = 0; i < 128; i++)
-    {
-        OLED_WR_Byte(0x00, OLED_DATA);
     }
 }
 
@@ -77,7 +68,7 @@ void OLED_ShowString(uint8_t x, uint8_t y, char *str, uint8_t reverseDisplay)
         if (y > 7)
             return;
 
-        c = *str - ' '; // 得到偏移后的值
+        c = *str - ' ';
         for (i = 0; i < 6; i++)
         {
             if (reverseDisplay)
@@ -154,9 +145,7 @@ void OLED_refreshScreen()
     uint8_t i, n;
     for (i = 0; i < 8; i++)
     {
-        OLED_WR_Byte(0xb0 + i, OLED_CMD); // 设置页地址（0~7）
-        OLED_WR_Byte(0x00, OLED_CMD);     // 设置显示位置—列低地址
-        OLED_WR_Byte(0x10, OLED_CMD);     // 设置显示位置—列高地址
+        OLED_Set_Pos(0, i);
         for (n = 0; n < 128; n++)
             OLED_WR_Byte(oled_outBuf[i][n], OLED_DATA);
     }

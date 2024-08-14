@@ -8,6 +8,7 @@ void lcd_set_window(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2);
 void lcd_write_data_batch(uint8_t *dat, int len);
 void lcd_fill(uint32_t color);
 void lcd_drawPoint(uint16_t x, uint16_t y, uint32_t color);
+
 void lcd_init();
 
 void lcd_disp(bool en);
