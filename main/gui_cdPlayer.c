@@ -162,7 +162,10 @@ void gui_player_init()
     lb_albumTitle = lv_label_create(area_player);
     lv_obj_set_style_text_color(lb_albumTitle, lv_color_make(0xc5, 0x86, 0xc0), 0);
     lv_obj_set_style_text_font(lb_albumTitle, &lv_font_montserrat_16, 0);
-    gui_setAlbumTitle("Album-Performer");
+    lv_obj_set_width(lb_albumTitle, 178);
+    lv_obj_set_height(lb_albumTitle, 20);
+    lv_label_set_long_mode(lb_albumTitle, LV_LABEL_LONG_DOT);
+    gui_setAlbumTitle("Album-Performer longlonglong");
 
     /***********************
      * 曲名
@@ -171,12 +174,20 @@ void gui_player_init()
     lb_trackTitle = lv_label_create(area_player);
     lv_obj_set_style_text_color(lb_trackTitle, lv_color_make(0xff, 0xff, 0xff), 0);
     lv_obj_set_style_text_font(lb_trackTitle, &lv_font_montserrat_26, 0);
+    lv_obj_set_width(lb_trackTitle, 230);
+    lv_obj_set_height(lb_trackTitle, 30);
+    lv_obj_set_style_text_align(lb_trackTitle, LV_TEXT_ALIGN_CENTER, 0);
+    lv_label_set_long_mode(lb_trackTitle, LV_LABEL_LONG_DOT);
 
     lb_trackPerformer = lv_label_create(area_player);
     lv_obj_set_style_text_color(lb_trackPerformer, lv_color_make(0xdd, 0xdd, 0xdd), 0);
     lv_obj_set_style_text_font(lb_trackPerformer, &lv_font_montserrat_16, 0);
+    lv_obj_set_width(lb_trackPerformer, 230);
+    lv_obj_set_height(lb_trackPerformer, 20);
+    lv_obj_set_style_text_align(lb_trackPerformer, LV_TEXT_ALIGN_CENTER, 0);
+    lv_label_set_long_mode(lb_trackPerformer, LV_LABEL_LONG_DOT);
 
-    gui_setTrackTitle("What title", "Who know");
+    gui_setTrackTitle("What title long long long long long", "Who know long long long long long");
 
     /***********************
      * 预加重
@@ -317,7 +328,7 @@ void gui_player_init()
     // lv_color_t lineColor = lv_color_make(0x00, 0x8c, 0x3a);
     lv_color_t lineColor = lv_color_make(0x43, 0xd9, 0x96);
 
-    int32_t maxPoint = 28000;
+    int32_t maxPoint = 29000;
 
     chart_left = lv_chart_create(area_left);
     lv_obj_add_style(chart_left, &style_oscilloscope, LV_PART_MAIN);
@@ -388,7 +399,27 @@ void gui_setTrackTitle(const char *title, const char *performer)
     if ((title != NULL) && (strcmp(oldTitle, title) != 0))
     {
         lv_label_set_text(lb_trackTitle, title);
-        lv_obj_align_to(lb_trackTitle, area_player, LV_ALIGN_TOP_MID, 0, 33);
+
+        bool noPerformer = true;
+        for (int i = 0; i < strlen(performer); i++)
+        {
+            if (performer[i] != ' ')
+            {
+                noPerformer = false;
+                break;
+            }
+        }
+
+        if (noPerformer)
+        {
+            lv_obj_set_height(lb_trackTitle, 60);
+            lv_obj_align_to(lb_trackTitle, area_player, LV_ALIGN_TOP_MID, 0, 25);
+        }
+        else
+        {
+            lv_obj_set_height(lb_trackTitle, 30);
+            lv_obj_align_to(lb_trackTitle, area_player, LV_ALIGN_TOP_MID, 0, 33);
+        }
     }
 
     if ((performer != NULL) && (strcmp(oldPerformer, performer) != 0))

@@ -777,7 +777,7 @@ void cdplayer_task_playControl(void *arg)
             uint32_t readBytes = readFrames * 2352;
             uint32_t readLba = cdplayer_driveInfo.trackList[*trackNo].lbaBegin + *readFrameCount;
 
-            printf("Read lba:%ld, len: %ld\n", readLba, readFrames);
+            // printf("Read lba:%ld, len: %ld\n", readLba, readFrames);
             esp_err_t err = usbhost_scsi_readCD(readLba, readCdBuf, &readFrames, &readBytes);
 
             if (err == ESP_OK)

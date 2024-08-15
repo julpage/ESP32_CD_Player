@@ -1,0 +1,3 @@
+0x00000 bootloader.bin
+0x08000 partition-table.bin 
+0x10000 CD_Player.bin
