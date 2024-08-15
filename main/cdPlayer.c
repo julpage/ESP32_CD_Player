@@ -616,6 +616,7 @@ void cdplayer_task_playControl(void *arg)
         if (btn_getPosedge(BTN_EJECT))
         {
             ESP_LOGI("cdplayer_task_playControl", "Eject disc");
+            cdplayer_playerInfo.playing = 0;
             esp_err_t err = usbhost_scsi_startStopUnit(true, false);
             if (err != ESP_OK)
             {
