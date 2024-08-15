@@ -44,17 +44,20 @@ void gui_player_init()
     lv_color_t color_foreground = lv_color_make(0x1f, 0x1f, 0x1f);
 
     // 界面
+    // main screen
     lv_obj_t *screen = lv_scr_act();
     lv_obj_set_style_bg_color(screen, color_background, 0);
 
     /***********************
      * 背景 - 状态栏
+     * Background - Status Bar
      */
 
     int size_barWidth = 240;
     int size_barHeight = AREA_STATUS_BAR_HEIGHT;
 
     // 顶部状态栏
+    // top
     static lv_style_t style_topBar;
     lv_style_init(&style_topBar);
     lv_style_set_radius(&style_topBar, 0);
@@ -72,6 +75,7 @@ void gui_player_init()
     lv_obj_set_scrollbar_mode(area_topBar, LV_SCROLLBAR_MODE_OFF);
 
     // 底部状态栏
+    // bottom
     static lv_style_t style_bottomBar;
     lv_style_init(&style_bottomBar);
     lv_style_set_radius(&style_bottomBar, 0);
@@ -91,6 +95,7 @@ void gui_player_init()
 
     /***********************
      * 背景 - 播放器
+     * Background - Player
      */
     int size_playerWidth = 240;
     int size_playerHeight = 240 - 2 * AREA_STATUS_BAR_HEIGHT - AREA_OSCILLOSCOPE_HEIGHT;
@@ -112,6 +117,7 @@ void gui_player_init()
 
     /***********************
      * 背景 - 示波器
+     * Background - Oscilloscope
      */
     int size_oscilloscopeWidth = 240 / 2;
     int size_oscilloscopeHeight = AREA_OSCILLOSCOPE_HEIGHT;
@@ -130,6 +136,7 @@ void gui_player_init()
 
     /***********************
      * 光驱型号
+     * CD drive model
      */
     static lv_style_t style1;
     lv_style_init(&style1);
@@ -142,6 +149,7 @@ void gui_player_init()
 
     /***********************
      * 光驱状态
+     * CD drive state
      */
     lb_driveState = lv_label_create(area_topBar);
     lv_obj_add_style(lb_driveState, &style1, 0);
@@ -149,6 +157,7 @@ void gui_player_init()
 
     /***********************
      * 专辑名
+     * album title
      */
     lb_albumTitle = lv_label_create(area_player);
     lv_obj_set_style_text_color(lb_albumTitle, lv_color_make(0xc5, 0x86, 0xc0), 0);
@@ -157,6 +166,7 @@ void gui_player_init()
 
     /***********************
      * 曲名
+     * track title and performer
      */
     lb_trackTitle = lv_label_create(area_player);
     lv_obj_set_style_text_color(lb_trackTitle, lv_color_make(0xff, 0xff, 0xff), 0);
@@ -170,6 +180,7 @@ void gui_player_init()
 
     /***********************
      * 预加重
+     * pre-Emphasis indicator
      */
     lv_style_init(&style_preEmphasis);
     lv_style_set_border_width(&style_preEmphasis, 0);
@@ -189,6 +200,7 @@ void gui_player_init()
 
     /***********************
      * 播放时间
+     * Play time
      */
     lb_time = lv_label_create(area_player);
     lv_obj_set_style_text_color(lb_time, lv_color_make(0xdc, 0xdc, 0xaa), LV_PART_MAIN);
@@ -206,6 +218,7 @@ void gui_player_init()
 
     /***********************
      * 进度条
+     * progress bar
      */
     bar_playProgress = lv_bar_create(area_player);
     lv_obj_set_size(bar_playProgress, 230, 11);
@@ -215,6 +228,7 @@ void gui_player_init()
 
     /***********************
      * 播放状态
+     * play state
      */
     lb_playState = lv_label_create(area_bottomBar);
     // lv_obj_set_style_text_color(lb_playState, lv_color_make(0xf1, 0xc4, 0x0f), LV_PART_MAIN);
@@ -225,6 +239,7 @@ void gui_player_init()
 
     /***********************
      * 音量
+     * volume
      */
     lb_volume = lv_label_create(area_bottomBar);
     // lv_obj_set_style_text_color(lb_volume, lv_color_make(0xf1, 0xc4, 0x0f), LV_PART_MAIN);
@@ -235,6 +250,7 @@ void gui_player_init()
 
     /***********************
      * 曲目数
+     * number of tracks
      */
     lb_trackNumber = lv_label_create(area_bottomBar);
     lv_obj_add_style(lb_trackNumber, &style1, 0);
@@ -242,6 +258,7 @@ void gui_player_init()
 
     /***********************
      * 电平表
+     * level meter
      */
     int size_meterWidth = 5;
 
@@ -277,6 +294,7 @@ void gui_player_init()
 
     /***********************
      * 示波器
+     * oscilloscope
      */
     size_oscilloscopeWidth = 240 / 2 - size_meterWidth - 1;
     size_oscilloscopeHeight = AREA_OSCILLOSCOPE_HEIGHT;
@@ -312,21 +330,20 @@ void gui_player_init()
     lv_chart_set_point_count(chart_left, size_oscilloscopeWidth);                 // 点数
     lv_chart_set_range(chart_left, LV_CHART_AXIS_PRIMARY_Y, -maxPoint, maxPoint); // 范围
 
-    ser_left = lv_chart_add_series(chart_left, lineColor, LV_CHART_AXIS_PRIMARY_Y);
-    lv_chart_set_all_value(chart_left, ser_left, 0);
-
     chart_right = lv_chart_create(area_right);
     lv_obj_add_style(chart_right, &style_oscilloscope, LV_PART_MAIN);
     lv_obj_add_style(chart_right, &style_oscilloscopeLine, LV_PART_ITEMS);
-    lv_obj_set_style_size(chart_right, 0, LV_PART_INDICATOR); // 不显示点
+    lv_obj_set_style_size(chart_right, 0, LV_PART_INDICATOR);
     lv_obj_set_size(chart_right, size_oscilloscopeWidth, size_oscilloscopeHeight);
     lv_obj_align_to(chart_right, area_right, LV_ALIGN_RIGHT_MID, 1, 0);
     lv_chart_set_div_line_count(chart_right, 3, 6);
-    lv_chart_set_update_mode(chart_right, LV_CHART_UPDATE_MODE_SHIFT);             // 滚动模式
-    lv_chart_set_point_count(chart_right, size_oscilloscopeWidth);                 // 点数
-    lv_chart_set_range(chart_right, LV_CHART_AXIS_PRIMARY_Y, -maxPoint, maxPoint); // 范围
+    lv_chart_set_update_mode(chart_right, LV_CHART_UPDATE_MODE_SHIFT);
+    lv_chart_set_point_count(chart_right, size_oscilloscopeWidth);
+    lv_chart_set_range(chart_right, LV_CHART_AXIS_PRIMARY_Y, -maxPoint, maxPoint);
 
+    ser_left = lv_chart_add_series(chart_left, lineColor, LV_CHART_AXIS_PRIMARY_Y);
     ser_right = lv_chart_add_series(chart_right, lineColor, LV_CHART_AXIS_PRIMARY_Y);
+    lv_chart_set_all_value(chart_left, ser_left, 0);
     lv_chart_set_all_value(chart_right, ser_right, 0);
 }
 
@@ -432,7 +449,7 @@ void gui_setProgress(uint32_t current, uint32_t total)
     oldToal = total;
 
     if (total == 0) // prevent IntegerDivideByZero exception
-        total = 0721;
+        total = 1234;
 
     lv_bar_set_range(bar_playProgress, 0, total);
     lv_bar_set_value(bar_playProgress, current, LV_ANIM_OFF);

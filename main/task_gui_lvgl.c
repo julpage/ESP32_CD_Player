@@ -23,6 +23,7 @@
 QueueHandle_t queue_oscilloscope = NULL;
 
 // 定时器回调
+// timer interrupt handler
 static bool IRAM_ATTR gpTimer_alarm_cb(gptimer_handle_t timer, const gptimer_alarm_event_data_t *edata, void *user_data)
 {
     lv_tick_inc(5);
@@ -40,12 +41,13 @@ void task_lvgl(void *args)
     lv_init();
 
     // 创建定时器给lvgl用
+    // create a timer
     ESP_LOGI("task_lvgl", "config gptimer.");
-    gptimer_handle_t gptimer = NULL; // 通用定时器实例
+    gptimer_handle_t gptimer = NULL;
     gptimer_config_t timer_config = {
-        .clk_src = GPTIMER_CLK_SRC_DEFAULT, // 选择时钟源
-        .direction = GPTIMER_COUNT_UP,      // 向上计数
-        .resolution_hz = 1000000,           // 给定时器用的时钟频率 1MHz, 1 tick=1us
+        .clk_src = GPTIMER_CLK_SRC_DEFAULT,
+        .direction = GPTIMER_COUNT_UP,
+        .resolution_hz = 1000000, // 给定时器用的时钟频率 1MHz, 1 tick=1us
     };
     gptimer_event_callbacks_t cbs = {
         .on_alarm = gpTimer_alarm_cb, // 回调函数
@@ -55,17 +57,19 @@ void task_lvgl(void *args)
         .reload_count = 0,                  // 中断发生时计数器设置成此数，auto_reload_on_alarm为1时有用
         .flags.auto_reload_on_alarm = true, // 是否使能自动重载功能
     };
-    ESP_ERROR_CHECK(gptimer_new_timer(&timer_config, &gptimer));            // 申请定时器，如果所有定时器已经申请完会报错
-    ESP_ERROR_CHECK(gptimer_register_event_callbacks(gptimer, &cbs, NULL)); // 设置中断回调函数
-    ESP_ERROR_CHECK(gptimer_enable(gptimer));                               // 使能
-    ESP_ERROR_CHECK(gptimer_set_alarm_action(gptimer, &alarm_config2));     // 设置中断值
-    ESP_ERROR_CHECK(gptimer_start(gptimer));                                // 开启定时器
+    ESP_ERROR_CHECK(gptimer_new_timer(&timer_config, &gptimer));
+    ESP_ERROR_CHECK(gptimer_register_event_callbacks(gptimer, &cbs, NULL));
+    ESP_ERROR_CHECK(gptimer_enable(gptimer));
+    ESP_ERROR_CHECK(gptimer_set_alarm_action(gptimer, &alarm_config2));
+    ESP_ERROR_CHECK(gptimer_start(gptimer));
 
     // 注册lvgl io设备
+    // Register the display in LVGL
     ESP_LOGI("task_lvgl", "lv_port_disp_init.");
     lv_port_disp_init();
 
     // 绘制界面
+    // draw ui
     ESP_LOGI("task_lvgl", "gui_player_init.");
     gui_player_init();
 
@@ -73,10 +77,12 @@ void task_lvgl(void *args)
     while (1)
     {
         // 光驱型号
+        // cd drive model
         sprintf(str, "%s-%s", cdplayer_driveInfo.vendor, cdplayer_driveInfo.product);
         gui_setDriveModel(str);
 
         // 碟状态
+        // disc state
         if (usbhost_driverObj.deviceIsOpened == 0)
             gui_setDriveState("No drive");
         else if (cdplayer_driveInfo.trayClosed == 0)
@@ -89,6 +95,7 @@ void task_lvgl(void *args)
             gui_setDriveState("Ready");
 
         // 音量
+        // volume
         gui_setVolume(cdplayer_playerInfo.volume);
 
         if (cdplayer_driveInfo.readyToPlay)
@@ -96,6 +103,7 @@ void task_lvgl(void *args)
             int8_t trackI = cdplayer_playerInfo.playingTrackIndex;
 
             // 播放状态
+            // play state
             if (cdplayer_playerInfo.fastForwarding)
                 gui_setPlayState(">>>");
             else if (cdplayer_playerInfo.fastBackwarding)
@@ -106,6 +114,7 @@ void task_lvgl(void *args)
                 gui_setPlayState(LV_SYMBOL_PAUSE);
 
             // 碟名
+            // album title and performer
             if (cdplayer_driveInfo.cdTextAvalibale)
             {
                 sprintf(str, "%s - %s", cdplayer_driveInfo.albumTitle, cdplayer_driveInfo.albumPerformer);
@@ -117,12 +126,14 @@ void task_lvgl(void *args)
             }
 
             // 预加重
+            // pre-emphasis
             if (cdplayer_driveInfo.trackList[trackI].preEmphasis)
                 gui_setEmphasis(true);
             else
                 gui_setEmphasis(false);
 
             // 轨名 歌手
+            // track title and performer
             if (cdplayer_driveInfo.cdTextAvalibale)
             {
                 gui_setTrackTitle(
@@ -136,19 +147,23 @@ void task_lvgl(void *args)
             }
 
             // 播放时长
+            // played time
             gui_setTime(
                 cdplay_frameToHmsf(cdplayer_playerInfo.readFrameCount),
                 cdplay_frameToHmsf(cdplayer_driveInfo.trackList[trackI].trackDuration));
 
             // 播放进度
+            // play progress bar
             gui_setProgress(
                 cdplayer_playerInfo.readFrameCount,
                 cdplayer_driveInfo.trackList[trackI].trackDuration);
 
             // 轨号
+            // track number
             gui_setTrackNum(trackI + 1, cdplayer_driveInfo.trackCount);
 
             // 示波器 电平表
+            // oscilloscope and level meter
             static int count = 0;
             static int32_t maxL = 0;
             static int32_t maxR = 0;

@@ -32,6 +32,7 @@ void app_main(void)
     ESP_ERROR_CHECK(err);
 
     /**
+     * 配置io
      * configure gpio
      */
     gpio_config_t io_conf;
@@ -72,9 +73,8 @@ void app_main(void)
     io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
     gpio_config(&io_conf);
 
-    /**
-     * init driver
-     */
+    // 初始化外设驱动
+    // init driver
     ESP_LOGI("app_main", "Init usb host");
     usbhost_driverInit();
     ESP_LOGI("app_main", "Init i2c");
@@ -84,10 +84,12 @@ void app_main(void)
     ESP_LOGI("app_main", "Init button");
     btn_init();
 
+    // 播放器进程
     // player task
     ESP_LOGI("app_main", "Run cd player");
     cdplay_init();
 
+    // ui进程
     // gui task
     uint8_t oledTest = 0xae;
     err = iic_writeReg(0x3c, 0, &oledTest, 1);

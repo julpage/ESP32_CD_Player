@@ -23,4 +23,4 @@ void gui_setVolume(int vol);
 void gui_setTrackNum(int current, int total);
 void gui_setMeter(int l, int r);
 
-#endif // !__GUI_RADIO_H_
+#endif

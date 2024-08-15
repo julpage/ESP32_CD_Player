@@ -113,7 +113,7 @@ esp_err_t usbhost_scsi_modeSense10(uint8_t pageCode, uint8_t *responData, uint32
 
     cbwcb[0] = 0x5a;                    // OPERATION CODE (5Ah)
     cbwcb[1] = 0x08;                    // disable block descriptors
-    cbwcb[2] = pageCode & 0x3f;         // PC[7:6]: Current values, PAGE CODE[5:0]
+    cbwcb[2] = pageCode & 0x3f;         // PC[7:6]: Current values, PAGE CODE[5:0]， 2Ah: MM Capabilities & Mechanical Status mode page
     cbwcb[7] = *((uint8_t *)(len) + 1); // ALLOCATION LENGTH (MSB)
     cbwcb[8] = *((uint8_t *)(len) + 0); // ALLOCATION LENGTH (LSB)
 

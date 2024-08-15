@@ -21,9 +21,7 @@ uint8_t readCdBuf[I2S_TX_BUFFER_LEN];
 void printMem(uint8_t *dat, uint16_t size)
 {
     for (int i = 0; i < size; i++)
-    {
         printf("%02x ", dat[i]);
-    }
     printf("\n");
 }
 
@@ -65,7 +63,7 @@ bool cdplayer_discIsCd()
     err = usbhost_scsi_getConfiguration(0x0000, 0x2, requireDat, &requireDatLen); // get Profile List Feature (0000h)
     if (err != ESP_OK)
     {
-        usbhost_scsi_requestSense(senseDat); // i don't care what cause error
+        usbhost_scsi_requestSense(senseDat); // i don't care what cause fail
         return false;
     }
     uint16_t currentProfile = __builtin_bswap16(*(uint16_t *)(requireDat + 6));
@@ -122,7 +120,7 @@ esp_err_t cdplayer_getPlayList(uint8_t *tracksCount, cdplayer_trackInfo_t *track
 
     //
     // 获取全部toc
-    // get toc data
+    // get all toc data
     //
     tocDat = (uint8_t *)malloc(tocLen);
     if (tocDat == NULL)
@@ -171,7 +169,7 @@ esp_err_t cdplayer_getPlayList(uint8_t *tracksCount, cdplayer_trackInfo_t *track
         }
 
         // 如果是最后一条轨就结束循环
-        // this track the last track, break
+        // aa is the last track, break
         if (tocDesc->Track_Number == 0xaa)
             break;
 
@@ -271,7 +269,7 @@ esp_err_t cpplayer_getCdText(char **albumTitle, char **albumPerformer, char **ti
 
     //
     // 分析字符串
-    // analyze cd text
+    // split cd text
     //
     usbhost_scsi_tocHeader_t *header = (usbhost_scsi_tocHeader_t *)(cdTextDat);
     usbhost_scsi_tocCdTextDesriptor_t *textSequence = (usbhost_scsi_tocCdTextDesriptor_t *)(cdTextDat + 4);
@@ -299,7 +297,7 @@ esp_err_t cpplayer_getCdText(char **albumTitle, char **albumPerformer, char **ti
     }
 
     // 申请字符串内存
-    // alloc string buf memory
+    // allocate string memory
     *titleStrBuf = (char *)malloc(titleStrBufSize);
     *performerStrBuf = (char *)malloc(performerStrBufSize);
     if (*titleStrBuf == NULL || *performerStrBuf == NULL)
@@ -441,6 +439,7 @@ void cdplayer_task_deviceAndDiscMonitor(void *arg)
         strcpy(cdplayer_driveInfo.product, "");
 
         // 等待设备连接
+        // wait for usb device connect
         while (usbhost_driverObj.deviceIsOpened == 0)
         {
             vTaskDelay(pdMS_TO_TICKS(500));
@@ -448,6 +447,7 @@ void cdplayer_task_deviceAndDiscMonitor(void *arg)
         }
 
         // 检查是不是光驱
+        // Check if usb device is CD/DVD device
         ESP_LOGI("cdplayer_task_deviceAndDiscMonitor", "Check if usb device is CD/DVD device.");
         responSize = 32;
         err = usbhost_scsi_inquiry(responDat, &responSize);
@@ -485,10 +485,11 @@ void cdplayer_task_deviceAndDiscMonitor(void *arg)
                     break;
                 }
             }
-            printf("Device model: %s - %s\n", cdplayer_driveInfo.vendor, cdplayer_driveInfo.product);
+            printf("Device model: %s %s\n", cdplayer_driveInfo.vendor, cdplayer_driveInfo.product);
         }
 
         // 等待光盘插入
+        // Wait for disc insert
         ESP_LOGI("cdplayer_task_deviceAndDiscMonitor", "Wait for disc insert");
         while (1)
         {
@@ -503,6 +504,7 @@ void cdplayer_task_deviceAndDiscMonitor(void *arg)
             continue;
 
         // 检查碟是否为cd
+        // Check if disc is cdda
         ESP_LOGI("cdplayer_task_deviceAndDiscMonitor", "Check if disc is cdda");
         cdplayer_driveInfo.discIsCD = cdplayer_discIsCd();
         if (!cdplayer_driveInfo.discIsCD)
@@ -512,6 +514,7 @@ void cdplayer_task_deviceAndDiscMonitor(void *arg)
         }
 
         // 读toc
+        // Read TOC
         ESP_LOGI("cdplayer_task_deviceAndDiscMonitor", "Read TOC");
         err = cdplayer_getPlayList(&cdplayer_driveInfo.trackCount, cdplayer_driveInfo.trackList);
         if (err != ESP_OK)
@@ -524,6 +527,7 @@ void cdplayer_task_deviceAndDiscMonitor(void *arg)
         }
 
         // 读cd-text(如果有)，从这里开始要注意free了
+        // Read CD-TEXT
         ESP_LOGI("cdplayer_task_deviceAndDiscMonitor", "Read CD-TEXT");
         cdplayer_driveInfo.cdTextAvalibale = false;
         err = cpplayer_getCdText(
@@ -546,6 +550,7 @@ void cdplayer_task_deviceAndDiscMonitor(void *arg)
         }
 
         // 打印播放列表
+        // print play list
         printf("**********PlayList**********\n");
         for (int i = 0; i < cdplayer_driveInfo.trackCount; i++)
         {
@@ -566,6 +571,7 @@ void cdplayer_task_deviceAndDiscMonitor(void *arg)
         vTaskDelay(pdMS_TO_TICKS(2000));
 
         // 等待碟片弹出或光驱移除
+        // wait for disc remove
     WAIT_FOR_DISC_REMOVE:
         while (1)
         {
@@ -589,6 +595,7 @@ void cdplayer_task_deviceAndDiscMonitor(void *arg)
         }
 
         // 碟片移除
+        // free cd text string memory
         if (cdplayer_driveInfo.cdTextAvalibale)
         {
             free(cdplayer_driveInfo.strBuf_titles);
@@ -605,6 +612,7 @@ void cdplayer_task_playControl(void *arg)
         btn_renew(0);
 
         // 弹出碟片
+        // eject disc
         if (btn_getPosedge(BTN_EJECT))
         {
             ESP_LOGI("cdplayer_task_playControl", "Eject disc");
@@ -621,6 +629,7 @@ void cdplayer_task_playControl(void *arg)
         }
 
         // 修改音量
+        // change volume
         static bool volumHasChange = false;
         if (btn_getNegedge(BTN_VOL_UP))
         {
@@ -657,6 +666,8 @@ void cdplayer_task_playControl(void *arg)
             }
         }
 
+        // 保存音量
+        // save volume
         if (volumHasChange && !cdplayer_playerInfo.playing)
         {
             volumHasChange = false;
@@ -674,6 +685,7 @@ void cdplayer_task_playControl(void *arg)
         }
 
         // 快进快退
+        // fast forward, fast backward
         if (btn_getLongPress(BTN_NEXT, 0))
         {
             cdplayer_playerInfo.fastForwarding = 1;
@@ -694,6 +706,7 @@ void cdplayer_task_playControl(void *arg)
         }
 
         // 下一曲 上一曲
+        // Next/Previous song
         if (btn_getPosedge(BTN_NEXT))
         {
             if (cdplayer_playerInfo.fastForwarding)
@@ -726,6 +739,7 @@ void cdplayer_task_playControl(void *arg)
         }
 
         // 播放暂停
+        // play pause
         if (btn_getPosedge(BTN_PLAY))
         {
             if (cdplayer_driveInfo.readyToPlay == 1)
@@ -748,6 +762,8 @@ void cdplayer_task_playControl(void *arg)
             }
         }
 
+        // 读cd
+        // read cd and sent to i2s buffer
         if (cdplayer_driveInfo.readyToPlay == 1 && cdplayer_playerInfo.playing &&
             !cdplayer_playerInfo.fastForwarding && !cdplayer_playerInfo.fastBackwarding &&
             !i2s_bufsFull)
@@ -783,6 +799,7 @@ void cdplayer_task_playControl(void *arg)
             }
 
             // 播放完成判断
+            // track finish playing
             if (*readFrameCount >= trackDuration)
             {
                 *readFrameCount = 0;
@@ -804,6 +821,7 @@ void cdplayer_task_playControl(void *arg)
 
 void cdplay_init()
 {
+    // 读音量
     // load volume
     nvs_handle_t my_handle;
     esp_err_t err;
@@ -814,7 +832,6 @@ void cdplay_init()
     nvs_close(my_handle);
 
     BaseType_t ret;
-
     ret = xTaskCreatePinnedToCore(cdplayer_task_deviceAndDiscMonitor,
                                   "cdplayer_task_deviceAndDiscMonitor",
                                   4096,
